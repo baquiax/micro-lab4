@@ -1,44 +1,70 @@
-// Plantilla de c�digo para la pr�ctica de laboratorio #4 de Microprocesadores
-// Eduardo Corpe�o
+// Plantilla de código para la práctica de laboratorio #4 de Microprocesadores
+// Eduardo Corpeño
 // Universidad Galileo, FISICC
 
 #include "LPC11xx.h" 
-
+#define puerto1  LPC_GPIO1->DATA
+#define puerto2  LPC_GPIO2->DATA
+#define puerto3  LPC_GPIO3->DATA
+#define pinLEDRojo 9
+#define pintLEDVerde 10
+#define pinLEDAzul 2
+#define pinPrimerSentido 1
+#define pinSegundoSentido 2
+#define pinTercerSentido 3
+#define pinCuartoSentido 4
+#define pinPush 0
+ 
 #define MASK(x) (1UL << (x))
 
-void arriba() {
-  
+char sentido1() {
+  return (puerto2 & MASK(pinPrimerSentido);
 }
 
-void abajo() {
-  
+char sentido2() {
+  return (puerto2 & MASK(pinSegundoSentido);
 }
 
-void derecha() {
-  
+char sentido3() {
+  return (puerto2 & MASK(pinTercerSentido);
 }
 
-void izquierda() {
-  
+char sentido4() {
+  return (puerto3 & MASK(pinCuartoSentido);
+}
+
+char push() {
+  return (puerto2 & MASK(pinPush);
 }
 
 void encender(char color) {
+  apagar();
   switch(color) {
     case 'r':
+      puerto1 |= (MASK(pinLEDRojo));
       break;
     case 'g':
+      puerto1 |= (MASK(pinLEDVerde));
       break;
     case 'b':
+      puerto1 |= (MASK(pinLEDAzul));
       break;
     case 'q':
+      puerto1 |= (MASK(pinLEDVerde));
+      puerto1 |= (MASK(pinLEDAzul));
       break;
     case 'a':
+      puerto1 |= (MASK(pinLEDRojo));
+      puerto1 |= (MASK(pinLEDVerde));
+      puerto1 |= (MASK(pinLEDAzul));
       break;     
   }
 }
 
 void apagar() {
-  
+  puerto1 &= ~(MASK(pinLEDRojo));
+  puerto1 &= ~(MASK(pinLEDVerde));
+  puerto1 &= ~(MASK(pinLEDAzul));
 }
 
 void configure() {
@@ -56,24 +82,26 @@ void configure() {
   LPC_GPIO1->DIR &= ~MASK(10); // verde
   LPC_GPIO1->DIR &= ~MASK(2); // azul
   
+  // HABILITANDO GPIO PARA EL PIN PIO1_2
+  LPC_IOCON->R_PIO1_2 = (LPC_IOCON->R_PIO1_2 & ~0x7) | 0x1;
+  
 }
 int main(void){
-  // escriba su c�digo aqu�
   configure();
   while(1){
-    if(arriba())
+    if(sentido4()) //Arriba
       encender('r');
-    else if(abajo())
+    else if(sentido3()) //Abajo
       encender('g');
-    else if(derecha())
+    else if(sentido2()) //Derecha
       encender('b');
-    else if(izquierda())
+    else if(sentido1()) //Izquierda
       encender('q'); //Green,Blue like aQua 
-    else if(boton())
+    else if(push()) // Push
       encender('a'); // a of All
     else
       apagar(); 
   }
 }
 
-// *******************************ARM University Program Copyright � ARM Ltd 2013*************************************   
+// *******************************ARM University Program Copyright & ARM Ltd 2013*************************************   
