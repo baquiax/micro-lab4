@@ -7,7 +7,7 @@
 #define puerto2  LPC_GPIO2->DATA
 #define puerto3  LPC_GPIO3->DATA
 #define pinLEDRojo 9
-#define pintLEDVerde 10
+#define pinLEDVerde 10
 #define pinLEDAzul 2
 #define pinPrimerSentido 1
 #define pinSegundoSentido 2
@@ -18,23 +18,29 @@
 #define MASK(x) (1UL << (x))
 
 char sentido1() {
-  return (puerto2 & MASK(pinPrimerSentido);
+  return !(puerto2 & MASK(pinPrimerSentido));
 }
 
 char sentido2() {
-  return (puerto2 & MASK(pinSegundoSentido);
+  return !(puerto2 & MASK(pinSegundoSentido));
 }
 
 char sentido3() {
-  return (puerto2 & MASK(pinTercerSentido);
+  return !(puerto2 & MASK(pinTercerSentido));
 }
 
 char sentido4() {
-  return (puerto3 & MASK(pinCuartoSentido);
+  return !(puerto3 & MASK(pinCuartoSentido));
 }
 
 char push() {
-  return (puerto2 & MASK(pinPush);
+  return !(puerto2 & MASK(pinPush));
+}
+
+void apagar() {
+  puerto1 &= ~(MASK(pinLEDRojo));
+  puerto1 &= ~(MASK(pinLEDVerde));
+  puerto1 &= ~(MASK(pinLEDAzul));
 }
 
 void encender(char color) {
@@ -61,26 +67,20 @@ void encender(char color) {
   }
 }
 
-void apagar() {
-  puerto1 &= ~(MASK(pinLEDRojo));
-  puerto1 &= ~(MASK(pinLEDVerde));
-  puerto1 &= ~(MASK(pinLEDAzul));
-}
-
 void configure() {
   LPC_SYSCON->SYSAHBCLKCTRL |= (1<<6); //Habilitando clock para el GPIO
   
   // HABILITANDO PINES DE ENTRADA
-  LPC_GPIO2->DIR |= MASK(1); // sentido 1
-  LPC_GPIO2->DIR |= MASK(2); // sentido 2
-  LPC_GPIO2->DIR |= MASK(3); // sentido 3
-  LPC_GPIO3->DIR |= MASK(4); // sentido 4
-  LPC_GPIO2->DIR |= MASK(0); // presionar
+  LPC_GPIO2->DIR &= ~MASK(1); // sentido 1
+  LPC_GPIO2->DIR &= ~MASK(2); // sentido 2
+  LPC_GPIO2->DIR &= ~MASK(3); // sentido 3
+  LPC_GPIO3->DIR &= ~MASK(4); // sentido 4
+  LPC_GPIO2->DIR &= ~MASK(0); // presionar
   
   // HABILITANDO PINES DE SALIDA
-  LPC_GPIO1->DIR &= ~MASK(9); // rojo
-  LPC_GPIO1->DIR &= ~MASK(10); // verde
-  LPC_GPIO1->DIR &= ~MASK(2); // azul
+  LPC_GPIO1->DIR |= MASK(9); // rojo
+  LPC_GPIO1->DIR |= MASK(10); // verde
+  LPC_GPIO1->DIR |= MASK(2); // azul
   
   // HABILITANDO GPIO PARA EL PIN PIO1_2
   LPC_IOCON->R_PIO1_2 = (LPC_IOCON->R_PIO1_2 & ~0x7) | 0x1;
@@ -88,17 +88,18 @@ void configure() {
 }
 int main(void){
   configure();
+	apagar();
   while(1){
     if(sentido4()) //Arriba
-      encender('r');
-    else if(sentido3()) //Abajo
       encender('g');
+    else if(sentido3()) //Abajo
+      encender('r');
     else if(sentido2()) //Derecha
-      encender('b');
+      encender('q');
     else if(sentido1()) //Izquierda
-      encender('q'); //Green,Blue like aQua 
+      encender('a'); //Green,Blue like aQua 
     else if(push()) // Push
-      encender('a'); // a of All
+      encender('b'); // a of All
     else
       apagar(); 
   }
